@@ -13,7 +13,7 @@ declare(strict_types=1);
  
 namespace Tobento\Service\Dater;
 
-//use Tobento\Service\Macro\Macroable;
+use Tobento\Service\Macro\Macroable;
 use DateTimeInterface;
 use DateTimeImmutable;
 use DateTime;
@@ -27,7 +27,9 @@ use Exception;
  * DateFormatter
  */
 class DateFormatter
-{    
+{
+    use Macroable;
+    
     /**
      * @var DateTimeZone
      */    
