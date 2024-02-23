@@ -384,6 +384,18 @@ class DateFormatterTest extends TestCase
             (new DateFormatter())->withMutable(true)->toDateTime('2021-06-24')
         );        
     }
+    
+    public function testToDateTimeMethodWithTimestamp()
+    {
+        $this->assertSame(
+            1708708399,
+            (new DateFormatter())->toDateTime('1708708399')->getTimestamp()
+        );
+        $this->assertSame(
+            1708708399,
+            (new DateFormatter())->toDateTime(1708708399)->getTimestamp()
+        );
+    }
 
     public function testToDateTimeMethodWithAnotherTimezone()
     {
