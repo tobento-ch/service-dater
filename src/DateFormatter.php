@@ -148,16 +148,13 @@ class DateFormatter
      */    
     public function getTimezone(?string $timezone = null): DateTimeZone
     {
-        if (is_null($timezone))
-        {
+        if (is_null($timezone)) {
             return $this->dateTimeZone;
         }
 
         try {
             return new DateTimeZone($timezone);
-        } 
-        catch (Throwable $t)
-        {
+        } catch (Throwable $t) {
             return $this->dateTimeZone ?: new DateTimeZone('Europe/Berlin');
         }
     }
@@ -221,28 +218,36 @@ class DateFormatter
         ?string $valueFormat = null
     ): ?DateTimeInterface {
 
-        if ($value instanceof DateTimeImmutable)
-        {            
-            if ($this->mutable)
-            {
+        if ($value instanceof DateTimeImmutable) {            
+            if ($this->mutable) {
                 return DateTime::createFromImmutable($value);
             }
 
             return $value;
         }
         
-        if ($value instanceof DateTime)
-        {            
-            if (! $this->mutable)
-            {                
+        if ($value instanceof DateTime) {            
+            if (! $this->mutable) {                
                 return DateTimeImmutable::createFromMutable($value);
             }
             
             return $value;
         }
-                
+        
+        // timestamp
+        if (is_numeric($value)) {
+            try {
+                if ($this->mutable) {
+                    return new DateTime('@'.(string)$value, $this->getTimezone($timezone));  
+                } else {
+                    return new DateTimeImmutable('@'.(string)$value, $this->getTimezone($timezone));    
+                }
+            } catch(Throwable $e) {
+                // ignore
+            }
+        }
+        
         try {
-            
             $value = is_string($value) ? $value : 'now';
             
             if ($this->mutable) {
@@ -251,25 +256,17 @@ class DateFormatter
                 $d = new DateTimeImmutable($value, $this->getTimezone($timezone));    
             }
             
-            if ($valueFormat === null)
-            {
+            if ($valueFormat === null) {
                 return $d;
             } else {
-                
-                if ($d->format($valueFormat) === $value)
-                {
+                if ($d->format($valueFormat) === $value) {
                     return $d;
                 }
-                
                 // just throw exception as to call catch.
                 throw new Exception('Invalid date!');
             }
-            
-        } 
-        catch (Throwable $t)
-        {
-            if ($fallback === null)
-            {
+        } catch (Throwable $t) {
+            if ($fallback === null) {
                 return null;
             }
  
@@ -289,8 +286,7 @@ class DateFormatter
      */
     public function now(?string $timeZone = null): DaterInterface
     {
-        if ($this->mutable)
-        {
+        if ($this->mutable) {
             return new DaterMutable('now', $this->getTimezone($timeZone));
         }
         
@@ -307,6 +303,8 @@ class DateFormatter
      * @param null|string $valueFormat The value format such as 'Y-m-d H:i:s'. If set it verifies the date.
      *                                 Because '2019-02-30' would return '2019-03-02'
      * @return null|DaterInterface Null on failure, otherwise DaterInterface
+     * @psalm-suppress InvalidReturnType
+     * @psalm-suppress InvalidReturnStatement
      */
     public function toDater(
         mixed $value,
@@ -317,13 +315,11 @@ class DateFormatter
       
         $date = $this->toDateTime($value, $timezone, $fallback, $valueFormat);
         
-        if (is_null($date))
-        {
+        if (is_null($date)) {
             return null;
         }
         
-        if ($date instanceof DateTime)
-        { 
+        if ($date instanceof DateTime) { 
             return DaterMutable::createFromInterface($date);
         }
         
@@ -355,8 +351,7 @@ class DateFormatter
         $date = $this->toDateTime($date);
         $currentDate = $this->toDateTime($currentDate);
         
-        if ($sameTimeIsPast)
-        {
+        if ($sameTimeIsPast) {
             return $date <= $currentDate;
         } else {
             return $date < $currentDate;
@@ -371,6 +366,7 @@ class DateFormatter
      * @param mixed $currentDate Relative calculation date.
      * @param bool $yearly If to use yearly independent calculation.
      * @return bool True if in between, otherwise false.
+     * @psalm-suppress UndefinedInterfaceMethod
      */
     public function inBetween(
         mixed $dateFrom,
@@ -444,9 +440,7 @@ class DateFormatter
     
         try {
             return $currentDate->diff($date);
-        } 
-        catch (Throwable $t)
-        {
+        } catch (Throwable $t) {
             return new DateInterval('P0M');
         }
     }
@@ -457,6 +451,7 @@ class DateFormatter
      * @param mixed $date The date.
      * @param mixed $currentDate Relative calculation date.
      * @return DateTimeInterface
+     * @psalm-suppress UndefinedInterfaceMethod
      */
     public function toCurrentYear(mixed $date, mixed $currentDate = 'now'): DateTimeInterface
     {        
@@ -478,8 +473,7 @@ class DateFormatter
      */
     public function toMonthNumber(mixed $month): ?int
     {
-        if (!is_string($month))
-        {
+        if (!is_string($month)) {
             return null;
         }
         
@@ -525,15 +519,13 @@ class DateFormatter
      */
     public function toMonth(mixed $number, string $pattern = 'MMMM', ?string $locale = null): ?string
     {
-        if (!is_numeric($number))
-        {
+        if (!is_numeric($number)) {
             return null;
         }
         
         $number = (int) $number;
         
-        if ($number > 12 || $number < 1)
-        {
+        if ($number > 12 || $number < 1) {
             return null;
         }
         
@@ -541,8 +533,7 @@ class DateFormatter
         
         $locale = $locale ?: $this->getLocale();
         
-        if (!in_array($pattern, ['M', 'MM', 'MMM', 'MMMM']))
-        {
+        if (!in_array($pattern, ['M', 'MM', 'MMM', 'MMMM'])) {
             $pattern = 'MMMM';
         }
         
@@ -558,9 +549,7 @@ class DateFormatter
         try {
             $month = $fmt->format($this->toDateTime($number));
             return $pattern === 'MMM' ? rtrim($month, '.') : $month;
-        } 
-        catch (Throwable $t)
-        {
+        } catch (Throwable $t) {
             return null;
         }
     }
@@ -573,15 +562,13 @@ class DateFormatter
      */
     public function toWeekdayNumber(mixed $weekday): ?int
     {
-        if (is_numeric($weekday))
-        {
+        if (is_numeric($weekday)) {
             $weekday = (int) $weekday;
 
             return ($weekday >= 0 && $weekday <= 7) ? $weekday : null;
         }
             
-        if (!is_string($weekday))
-        {
+        if (!is_string($weekday)) {
             return null;
         }
         
@@ -610,13 +597,11 @@ class DateFormatter
      */
     public function toWeekday(mixed $number, string $pattern = 'EEEE', ?string $locale = null): ?string
     {
-        if (!is_int($number))
-        {
+        if (!is_int($number)) {
             return null;
         }
         
-        if ($number > 7 || $number < 0)
-        {
+        if ($number > 7 || $number < 0) {
             return null;
         }
         
@@ -624,8 +609,7 @@ class DateFormatter
         
         $locale = $locale ?: $this->getLocale();
         
-        if (!in_array($pattern, ['E', 'EE', 'EEE', 'EEEE', 'EEEEE']))
-        {
+        if (!in_array($pattern, ['E', 'EE', 'EEE', 'EEEE', 'EEEEE'])) {
             $pattern = 'EEEE';
         }
         
@@ -641,9 +625,7 @@ class DateFormatter
         try {
             $weekday = $fmt->format($this->toDateTime($number));
             return rtrim($weekday, '.');
-        } 
-        catch (Throwable $t)
-        {
+        } catch (Throwable $t) {
             return null;
         }
     }    
@@ -684,9 +666,7 @@ class DateFormatter
         
         try {
             return $fmt->format($this->toDateTime($value));
-        } 
-        catch (Throwable $t)
-        {
+        } catch (Throwable $t) {
             return $fmt->format(time());
         }
     }
