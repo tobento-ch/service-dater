@@ -17,6 +17,8 @@ use DateTimeImmutable;
 
 /**
  * Dater
+ *
+ * @psalm-immutable
  */
 class Dater extends DateTimeImmutable implements DaterInterface
 {
@@ -28,7 +30,8 @@ class Dater extends DateTimeImmutable implements DaterInterface
      */
     public function addMinutes(int $minutes): static
     {
-        return $this->modify('+'.$minutes.' minutes');
+        $modified = $this->modify('+'.$minutes.' minutes');
+        return $modified ?: $this;
     }
 
     /**
@@ -39,7 +42,8 @@ class Dater extends DateTimeImmutable implements DaterInterface
      */
     public function subMinutes(int $minutes): static
     {
-        return $this->modify('-'.$minutes.' minutes');
+        $modified = $this->modify('-'.$minutes.' minutes');
+        return $modified ?: $this;
     }
 
     /**
@@ -50,7 +54,8 @@ class Dater extends DateTimeImmutable implements DaterInterface
      */
     public function addDays(int $days): static
     {
-        return $this->modify('+'.$days.' days');
+        $modified = $this->modify('+'.$days.' days');
+        return $modified ?: $this;
     }
 
     /**
@@ -61,6 +66,7 @@ class Dater extends DateTimeImmutable implements DaterInterface
      */
     public function subDays(int $days): static
     {
-        return $this->modify('-'.$days.' days');
+        $modified = $this->modify('-'.$days.' days');
+        return $modified ?: $this;
     }    
 }
