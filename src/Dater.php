@@ -17,8 +17,6 @@ use DateTimeImmutable;
 
 /**
  * Dater
- *
- * @psalm-immutable
  */
 class Dater extends DateTimeImmutable implements DaterInterface
 {
