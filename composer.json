@@ -1,5 +1,6 @@
 {
     "name": "tobento/service-dater",
+    "version": "2.0",
     "type": "library",
     "description": "Useful methods to format, verify and display dates.",
     "keywords": [
@@ -21,12 +22,12 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.0",
-        "tobento/service-macro": "^1.0"
+        "php": ">=8.4",
+        "tobento/service-macro": "^2.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5",
-        "vimeo/psalm": "^4.0"
+        "phpunit/phpunit": "^12.3",
+        "vimeo/psalm": "^6.13"
     },    
     "autoload": {
         "psr-4": {
